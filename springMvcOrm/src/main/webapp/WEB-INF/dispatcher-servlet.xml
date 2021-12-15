@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:c="http://www.springframework.org/schema/c"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    
+    <context:component-scan
+        base-package="com.springframework.springMvcOrm" />
+
+    <!--JDBC DataSource Settings DriverManagerDataSource -->
+    <bean
+        class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+        name="driverManagerDataSource"
+        p:driverClassName="com.mysql.cj.jdbc.Driver"
+        p:url="jdbc:mysql://localhost:3306/springdb" p:username="root"
+        p:password="" />
+
+    <!--Hibernate-ORM use LocalSessionFactoryBean which require DriverManagerDataSource, 
+    MySQLDialect and annotateClasses -->
+    <bean
+        class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
+        name="localSessionFactoryBean"
+        p:dataSource-ref="driverManagerDataSource">
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+            </props>
+        </property>
+        <property name="annotatedClasses">
+             <list>
+                <value>com.springframework.springMvcOrm.Entities.User</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--HibernateTemplate uses LocalSessionFactoryBean -->
+    <bean class="org.springframework.orm.hibernate5.HibernateTemplate"
+              name="hibernateTemplate"
+              p:sessionFactory-ref="localSessionFactoryBean" />
+
+    <!--HibernateTransactionManager work around LocalSessionFactoryBean for 
+    transaction Management -->
+    <bean
+        class="org.springframework.orm.hibernate5.HibernateTransactionManager"
+        name="transactionManager"
+        p:sessionFactory-ref="localSessionFactoryBean" />
+
+    <!--InternalResourceViewResolver prefix and Suffix -->
+    <bean
+        class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+        name="internalResourceViewResolver">
+        <property name="prefix">
+            <value>/WEB-INF/views/</value>
+        </property>
+        <property name="suffix">
+            <value>.jsp</value>
+        </property>
+    </bean>
+</beans>
